@@ -1,6 +1,6 @@
 Read this very carefully
 
-TEMP RESET TEST
+TEMP RESET
 
-Change made on feature-1 branch
+This line was edited in conflict-branch.
 
