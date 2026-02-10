@@ -1,11 +1,12 @@
 //begin = calc.cpp ============
 #include <sstream>
 #include <iostream>
+#include "adder.h"
 
 int main (int argc , char * argv [] ) {
 int a, b, c;
 
-if(argc != 3 ) returnl;
+if(argc != 3 ) return;
 
 std::string  sa( argv [1] ) ;
 std::string  sb( argv [2] ) ;
