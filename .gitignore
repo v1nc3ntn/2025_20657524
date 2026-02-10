@@ -1,6 +1,9 @@
-cl
-*.obj
+# Compiled outputs (don’t upload these)
 *.exe
-*.ilk
+*.obj
+
+# Visual Studio noise
+.vs/
 *.pdb
+*.ilk
 *.log
