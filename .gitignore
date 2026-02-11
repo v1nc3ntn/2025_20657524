@@ -1,9 +1,9 @@
-# Compiled outputs (don’t upload these)
-*.exe
+# C/C++ build outputs
 *.obj
+*.exe
+*.lib
+*.exp
+*.dll
 
-# Visual Studio noise
-.vs/
-*.pdb
-*.ilk
-*.log
+# Worksheet3 build folder
+Worksheet3/adder_static/
