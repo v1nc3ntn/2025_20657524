@@ -18,8 +18,12 @@ public:
     ~MainWindow();
 
 public slots:
-    void handleButton1();    // NEW
-    void handleButton2();    // NEW
+    void handleButton1();    // NEW to handle button1
+    void handleButton2();    // NEW to handle butotn2
+
+signals:
+    void statusUpdateMessage(const QString& message, int timeout);  // NEW to handle status bar
+
 
 private:
     Ui::MainWindow* ui;
