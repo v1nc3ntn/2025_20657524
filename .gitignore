@@ -39,3 +39,7 @@ Worksheet3/*.exp
 
 # Ignore all build directories
 **/build/
+
+# Ignore completed worksheets
+Worksheet3/
+Worksheet4/
