@@ -1,9 +1,41 @@
-# C/C++ build outputs
+# CMake / build output
+**/build/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+*.cmake.user
+
+# Visual Studio
+.vs/
+**/*.vcxproj*
+**/*.sln
+**/x64/
+**/Debug/
+**/Release/
+
+# Doxygen output
+doxygen/
+**/html/
+**/latex/
+**/rtf/
+
+# Windows build artefacts
 *.obj
 *.exe
 *.lib
 *.exp
+*.pdb
 *.dll
 
-# Worksheet3 build folder
-Worksheet3/adder_static/
+# Generic binary files
+*.o
+*.out
+
+# Ignore whole worksheet build folders
+Worksheet3/*.obj
+Worksheet3/*.exe
+Worksheet3/*.lib
+Worksheet3/*.exp
+
+# Ignore all build directories
+**/build/
