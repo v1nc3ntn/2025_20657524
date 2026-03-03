@@ -1,0 +1,10 @@
+<RCC>
+    <qresource prefix="/">
+        <file>New folder/fileopen.png</file>
+        <file>New folder/filesave.png</file>
+        <file>New folder/help.png</file>
+        <file>New folder/print.png</file>
+        <file>New folder/startVR.png</file>
+        <file>New folder/stopVR.png</file>
+    </qresource>
+</RCC>

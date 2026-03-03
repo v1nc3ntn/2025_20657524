@@ -1,6 +1,9 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QMessageBox>
+#include "optiondialog.h"
+#include <QDialog>
+#include <QFileDialog>
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
@@ -56,7 +59,15 @@ void MainWindow::handleButton1()
 
 void MainWindow::handleButton2()
 {
-    emit statusUpdateMessage(QString("Button 2 was clicked"), 0);
+    OptionDialog dialog(this);
+
+    if (dialog.exec() == QDialog::Accepted) {
+        emit statusUpdateMessage(QString("Dialog accepted ") + dialog.getText(), 0);
+    }
+    else {
+        emit statusUpdateMessage(QString("Dialog rejected"), 0);
+    }
+    
 }
 
 void MainWindow::handleTreeClicked()
@@ -71,4 +82,19 @@ void MainWindow::handleTreeClicked()
     QString text = selectedPart->data(0).toString();
 
     emit statusUpdateMessage(QString("The selected item is: ") + text, 0);
+}
+
+void MainWindow::on_actionOpen_File_triggered()
+{
+    QString fileName = QFileDialog::getOpenFileName(
+        this,
+        tr("Open File"),
+        "C:\\",
+        tr("STL Files (*.stl);;Text Files (*.txt)")
+    );
+
+    if (fileName.isEmpty())
+        return;
+
+    emit statusUpdateMessage(QString("Select File: ") + fileName, 0);
 }

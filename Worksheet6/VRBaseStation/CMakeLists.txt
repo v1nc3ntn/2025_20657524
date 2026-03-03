@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.19)
 project(VRBaseStation LANGUAGES CXX)
 find_package(Qt6 6.5 REQUIRED COMPONENTS Core Widgets LinguistTools)
+set(CMAKE_AUTORCC ON)
 qt_standard_project_setup()
 qt_add_executable(VRBaseStation
     WIN32 MACOSX_BUNDLE
@@ -12,6 +13,11 @@ qt_add_executable(VRBaseStation
     ModelPart.cpp
     ModelPartList.h
     ModelPartList.cpp
+    icons.qrc
+    optiondialog.cpp
+    optiondialog.h
+    optiondialog.ui
+
 )
 qt_add_translations(
     TARGETS VRBaseStation
