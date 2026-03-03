@@ -8,17 +8,41 @@ MainWindow::MainWindow(QWidget* parent)
 {
     ui->setupUi(this);
 
-    // Connect button 1 signal to slot
+    // Connect button signals to slots
     connect(ui->pushButton, &QPushButton::released, this, &MainWindow::handleButton1);
-
-    // Connect button 2 signal to slot
     connect(ui->pushButton_2, &QPushButton::released, this, &MainWindow::handleButton2);
 
-    // Connect statusUpdateMessage signal to statusbar's showMessage slot
+    // Connect statusUpdateMessage signal to statusbar
     connect(this, &MainWindow::statusUpdateMessage,
         ui->statusbar, &QStatusBar::showMessage);
-}
 
+    // Connect treeView click signal to slot
+    connect(ui->treeView, &QTreeView::clicked, this, &MainWindow::handleTreeClicked);
+
+    // Create ModelPartList and link to treeView
+    this->partList = new ModelPartList("Parts List");
+    ui->treeView->setModel(this->partList);
+
+    // Get root item
+    ModelPart* rootItem = this->partList->getRootItem();
+
+    // Add 3 top level items each with 5 children
+    for (int i = 0; i < 3; i++) {
+        QString name = QString("TopLevel %1").arg(i);
+        QString visible("true");
+
+        ModelPart* childItem = new ModelPart({ name, visible });
+        rootItem->appendChild(childItem);
+
+        for (int j = 0; j < 5; j++) {
+            QString name = QString("Item %1,%2").arg(i).arg(j);
+            QString visible("true");
+
+            ModelPart* childChildItem = new ModelPart({ name, visible });
+            childItem->appendChild(childChildItem);
+        }
+    }
+}
 
 MainWindow::~MainWindow()
 {
@@ -28,15 +52,23 @@ MainWindow::~MainWindow()
 void MainWindow::handleButton1()
 {
     emit statusUpdateMessage(QString("Button 1 was clicked"), 0);
-    QMessageBox msgBox;
-    msgBox.setText("Button 1 was clicked");
-    msgBox.exec();
 }
 
 void MainWindow::handleButton2()
 {
     emit statusUpdateMessage(QString("Button 2 was clicked"), 0);
-    QMessageBox msgBox;
-    msgBox.setText("Button 2 was clicked");
-    msgBox.exec();
+}
+
+void MainWindow::handleTreeClicked()
+{
+    // Get the index of the selected item
+    QModelIndex index = ui->treeView->currentIndex();
+
+    // Get a pointer to the item from the index
+    ModelPart* selectedPart = static_cast<ModelPart*>(index.internalPointer());
+
+    // Retrieve the name string from the item
+    QString text = selectedPart->data(0).toString();
+
+    emit statusUpdateMessage(QString("The selected item is: ") + text, 0);
 }
