@@ -12,28 +12,24 @@
 #include <vtkCamera.h>
 #include <vtkNew.h>
 #include <vtkProperty.h>
+#include <vtkSTLReader.h>
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    // Add context menu action to treeView
     ui->treeView->addAction(ui->actionItem_Options);
-    // Connect button signals to slots
     connect(ui->pushButton, &QPushButton::released, this, &MainWindow::handleButton1);
     connect(ui->pushButton_2, &QPushButton::released, this, &MainWindow::handleButton2);
-    // Connect statusUpdateMessage signal to statusbar
     connect(this, &MainWindow::statusUpdateMessage,
         ui->statusbar, &QStatusBar::showMessage);
-    // Connect treeView click signal to slot
     connect(ui->treeView, &QTreeView::clicked, this, &MainWindow::handleTreeClicked);
-    // Create ModelPartList and link to treeView
+
     this->partList = new ModelPartList("Parts List");
     ui->treeView->setModel(this->partList);
-    // Get root item
+
     ModelPart* rootItem = this->partList->getRootItem();
-    // Add 3 top level items each with 5 children
     for (int i = 0; i < 3; i++) {
         QString name = QString("TopLevel %1").arg(i);
         QString visible("true");
@@ -54,21 +50,6 @@ MainWindow::MainWindow(QWidget* parent)
     /* Add a renderer */
     renderer = vtkSmartPointer<vtkRenderer>::New();
     renderWindow->AddRenderer(renderer);
-
-    /* Create an object and add to renderer */
-    vtkNew<vtkCylinderSource> cylinder;
-    cylinder->SetResolution(8);
-
-    vtkNew<vtkPolyDataMapper> cylinderMapper;
-    cylinderMapper->SetInputConnection(cylinder->GetOutputPort());
-
-    vtkNew<vtkActor> cylinderActor;
-    cylinderActor->SetMapper(cylinderMapper);
-    cylinderActor->GetProperty()->SetColor(1., 0., 0.35);
-    cylinderActor->RotateX(30.0);
-    cylinderActor->RotateY(-45.0);
-
-    renderer->AddActor(cylinderActor);
 
     /* Reset Camera */
     renderer->ResetCamera();
@@ -94,11 +75,8 @@ void MainWindow::handleButton2()
 
 void MainWindow::handleTreeClicked()
 {
-    // Get the index of the selected item
     QModelIndex index = ui->treeView->currentIndex();
-    // Get a pointer to the item from the index
     ModelPart* selectedPart = static_cast<ModelPart*>(index.internalPointer());
-    // Retrieve the name string from the item
     QString text = selectedPart->data(0).toString();
     emit statusUpdateMessage(QString("The selected item is: ") + text, 0);
 }
@@ -113,36 +91,79 @@ void MainWindow::on_actionOpen_File_triggered()
     );
     if (fileName.isEmpty())
         return;
-    // Update the selected tree item's name to the filename
+
     QModelIndex index = ui->treeView->currentIndex();
+
+    QStringList fileInfo = fileName.split("/");
+    if (fileInfo.isEmpty())
+        fileInfo = fileName.split("\\");
+    QString name = fileInfo.last();
+
+    ModelPart* newItem = new ModelPart({ name, QString("true") });
+
     if (index.isValid()) {
         ModelPart* selectedPart = static_cast<ModelPart*>(index.internalPointer());
-        selectedPart->setName(fileName);
-        emit statusUpdateMessage(QString("Opened: ") + fileName, 0);
+        selectedPart->appendChild(newItem);
     }
     else {
-        emit statusUpdateMessage(QString("No item selected - please select a tree item first"), 0);
+        partList->getRootItem()->appendChild(newItem);
     }
+
+    newItem->loadSTL(fileName);
+
+    partList->layoutChanged();
+    updateRender();
+
+    emit statusUpdateMessage(QString("Opened: ") + fileName, 0);
 }
 
 void MainWindow::on_actionItem_Options_triggered()
 {
-    // Get the selected item
     QModelIndex index = ui->treeView->currentIndex();
     if (!index.isValid()) {
         emit statusUpdateMessage(QString("No item selected"), 0);
         return;
     }
     ModelPart* selectedPart = static_cast<ModelPart*>(index.internalPointer());
-    // Create dialog and load current values from the selected part
     OptionDialog dialog(this);
     dialog.loadFromModelPart(selectedPart);
-    // Show dialog and save values back if accepted
     if (dialog.exec() == QDialog::Accepted) {
         dialog.saveToModelPart(selectedPart);
         emit statusUpdateMessage(QString("Item updated: ") + selectedPart->getName(), 0);
     }
     else {
         emit statusUpdateMessage(QString("Edit cancelled"), 0);
+    }
+}
+
+void MainWindow::updateRender()
+{
+    renderer->RemoveAllViewProps();
+    int rows = partList->rowCount(QModelIndex());
+    for (int i = 0; i < rows; i++) {
+        updateRenderFromTree(partList->index(i, 0, QModelIndex()));
+    }
+    renderer->ResetCamera();
+    renderer->Render();
+    renderWindow->Render();
+}
+
+void MainWindow::updateRenderFromTree(const QModelIndex& index)
+{
+    if (index.isValid()) {
+        ModelPart* selectedPart = static_cast<ModelPart*>(index.internalPointer());
+        vtkSmartPointer<vtkActor> actor = selectedPart->getActor();
+        if (actor) {
+            renderer->AddActor(actor);
+        }
+    }
+
+    if (!partList->hasChildren(index) || (index.flags() & Qt::ItemNeverHasChildren)) {
+        return;
+    }
+
+    int rows = partList->rowCount(index);
+    for (int i = 0; i < rows; i++) {
+        updateRenderFromTree(partList->index(i, 0, index));
     }
 }

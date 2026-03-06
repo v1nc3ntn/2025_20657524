@@ -61,7 +61,6 @@ void ModelPart::setData(int column, const QVariant& value)
     m_itemData[column] = value;
 }
 
-/* Visibility */
 bool ModelPart::isVisible() const
 {
     return m_isVisible;
@@ -70,11 +69,9 @@ bool ModelPart::isVisible() const
 void ModelPart::setVisible(bool visible)
 {
     m_isVisible = visible;
-    /* Also update the QVariant data array so treeview reflects change */
     setData(1, visible ? QString("true") : QString("false"));
 }
 
-/* Colour */
 int ModelPart::getColourR() const { return m_colourR; }
 int ModelPart::getColourG() const { return m_colourG; }
 int ModelPart::getColourB() const { return m_colourB; }
@@ -86,7 +83,6 @@ void ModelPart::setColour(int r, int g, int b)
     m_colourB = b;
 }
 
-/* Name */
 QString ModelPart::getName() const
 {
     return data(0).toString();
@@ -95,4 +91,22 @@ QString ModelPart::getName() const
 void ModelPart::setName(const QString& name)
 {
     setData(0, name);
+}
+
+void ModelPart::loadSTL(QString fileName)
+{
+    stlReader = vtkSmartPointer<vtkSTLReader>::New();
+    stlReader->SetFileName(fileName.toStdString().c_str());
+    stlReader->Update();
+
+    mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+    mapper->SetInputConnection(stlReader->GetOutputPort());
+
+    actor = vtkSmartPointer<vtkActor>::New();
+    actor->SetMapper(mapper);
+}
+
+vtkSmartPointer<vtkActor> ModelPart::getActor()
+{
+    return actor;
 }

@@ -34,5 +34,7 @@ private:
     vtkSmartPointer<vtkRenderer> renderer;
     vtkSmartPointer<vtkGenericOpenGLRenderWindow> renderWindow;
     QAction* actionItemOptions;
+    void updateRender();
+    void updateRenderFromTree(const QModelIndex& index);
 };
 #endif // MAINWINDOW_H
